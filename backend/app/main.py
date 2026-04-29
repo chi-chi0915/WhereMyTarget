@@ -1,9 +1,13 @@
 from fastapi import FastAPI
+
+from app.controllers.document_controller import router as document_router
 from app.database import test_db_connection, create_tables
 
 # API 객체
 app = FastAPI(title="WhereMyTarget API")
 
+# 컨트롤러 등록
+app.include_router(document_router)
 
 #@는 데코레이터로 부르고 API를 주소 정의함
 #해당 주소로 접근하면 함수를 실행함
