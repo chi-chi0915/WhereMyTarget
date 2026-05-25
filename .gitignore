@@ -393,3 +393,7 @@ data/
 # Local DB / vector DB volumes
 postgres_data/
 qdrant_data/
+
+# parser experiment data
+backend/experiments/parser_compare/sample_pdfs/
+backend/experiments/parser_compare/outputs/
