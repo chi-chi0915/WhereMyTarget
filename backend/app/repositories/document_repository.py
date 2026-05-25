@@ -45,3 +45,7 @@ class DocumentRepository:
         db.flush()
 
         return document_file
+    
+    # 파일 단건 조회
+    def find_by_id(self, db, document_id: int):
+        return db.get(Document, document_id)

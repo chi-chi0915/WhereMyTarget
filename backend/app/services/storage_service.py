@@ -37,3 +37,7 @@ class StorageService:
         file_size = save_path.stat().st_size
 
         return storage_key, file_size
+    
+    # storage_key로 파일 경로 조회
+    def get_file_path(self, storage_key: str) -> Path:
+        return self.upload_dir / storage_key

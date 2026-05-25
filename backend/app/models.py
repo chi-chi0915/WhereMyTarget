@@ -71,14 +71,24 @@ class Chunk(Base):
     # 문서 id
     document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
 
-    # 문서 페이지
-    page_number = Column(Integer, nullable=True)
+    # 부모 chunk id
+    parent_chunk_id = Column(Integer, ForeignKey("chunks.id", ondelete="CASCADE"), nullable=True)
 
-    # 문서의 chunk 번호
+    # chunk 타입(parent or child)
+    chunk_type = Column(String(50), nullable=False)
+
+    # 문서 내 chunk 번호
     chunk_index = Column(Integer, nullable=False)
 
-    # 근거 문단 텍스트
+    # chunk 내용
     content = Column(Text, nullable=False)
+
+    # chunk 페이지
+    start_page = Column(Integer, nullable=True)
+    end_page = Column(Integer, nullable=True)
+
+    # 텍스트 수
+    char_count = Column(Integer, nullable=True)
 
     # Qdrant에 저장된 point id
     qdrant_point_id = Column(String(100), nullable=True)
@@ -86,5 +96,15 @@ class Chunk(Base):
     # 생성 날짜
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # ORM 관계
     document = relationship("Document", back_populates="chunks")
+
+    parent = relationship(
+        "Chunk",
+        remote_side=[id],
+        back_populates="children"
+    )
+
+    children = relationship(
+        "Chunk",
+        back_populates="parent"
+    )
