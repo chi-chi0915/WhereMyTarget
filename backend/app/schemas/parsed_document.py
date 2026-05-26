@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-
+from app.schemas.chunk import ParentChunk
 
 # 파싱된 문서의 개별 요소
 class ParsedElement(BaseModel):
@@ -27,6 +27,9 @@ class ParsedDocument(BaseModel):
 
     # 파싱 결과
     elements: list[ParsedElement] = Field(default_factory=list)
+
+    # parent chunk
+    parent_chunks: list[ParentChunk] = Field(default_factory=list)
 
     # 문서 전체 글자 수
     total_char_count: int = 0
