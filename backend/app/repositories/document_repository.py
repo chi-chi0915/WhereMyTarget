@@ -47,5 +47,23 @@ class DocumentRepository:
         return document_file
     
     # 파일 단건 조회
-    def find_by_id(self, db, document_id: int):
+    def find_by_id(
+        self,
+        db: Session,
+        document_id: int,
+    ) -> Document | None:
         return db.get(Document, document_id)
+
+    # 문서 상태 변경
+    def update_status(
+        self,
+        db: Session,
+        document: Document,
+        status: str,
+    ) -> Document:
+        document.status = status
+
+        db.add(document)
+        db.flush()
+
+        return document

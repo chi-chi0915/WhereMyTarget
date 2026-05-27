@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, BigInteger
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, BigInteger, UniqueConstraint, JSON
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 
@@ -66,6 +66,15 @@ class DocumentFile(Base):
 class Chunk(Base):
     __tablename__ = "chunks"
 
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "chunk_type",
+            "chunk_index",
+            name="uq_chunks_document_type_index",
+        ),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
 
     # 문서 id
@@ -90,9 +99,12 @@ class Chunk(Base):
     # 텍스트 수
     char_count = Column(Integer, nullable=True)
 
+    # chunk 추가 정보
+    metadata_json = Column("metadata", JSON, nullable=True)
+
     # Qdrant에 저장된 point id
     qdrant_point_id = Column(String(100), nullable=True)
-
+    
     # 생성 날짜
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
@@ -106,5 +118,7 @@ class Chunk(Base):
 
     children = relationship(
         "Chunk",
-        back_populates="parent"
+        back_populates="parent",
+        cascade="all, delete-orphan",
+        single_parent=True
     )
