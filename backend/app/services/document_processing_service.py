@@ -49,10 +49,12 @@ class DocumentProcessingService:
             file_path=file_path,
         )
 
-        parent_chunks = self.chunking_service.create_parent_chunks(
+        chunking_result = self.chunking_service.create_chunks(
+            document_id=parsed_document.document_id,
             elements=parsed_document.elements,
         )
 
-        parsed_document.parent_chunks = parent_chunks
+        parsed_document.parent_chunks = chunking_result.parent_chunks
+        parsed_document.child_chunks = chunking_result.child_chunks
 
         return parsed_document

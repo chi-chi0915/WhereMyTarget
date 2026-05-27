@@ -141,7 +141,7 @@ class PdfParserService:
         roman_section_pattern = r"^[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+\."
 
         # 숫자
-        number_section_pattern = r"^\d+(\.\d+)*\s+"
+        number_section_pattern = r"^\d+([.,]\d+)*\s+"
 
         # 주요 섹션 제목
         named_section_headings = {
