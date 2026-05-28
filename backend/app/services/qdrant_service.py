@@ -1,7 +1,7 @@
 from typing import Any
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import Distance, PointStruct, VectorParams, FieldCondition, Filter, MatchValue
 
 from app.config import settings
 
@@ -101,3 +101,41 @@ class QdrantService:
             payload.update(metadata)
 
         return payload
+    
+    # point 검색
+    def search_points(
+        self,
+        query_vector: list[float],
+        top_k: int,
+        document_id: int | None = None,
+    ):
+        self.ensure_collection()
+
+        if len(query_vector) != self.vector_size:
+            raise ValueError(
+                f"query vector 크기가 일치하지 않습니다. "
+                f"expected={self.vector_size}, actual={len(query_vector)}"
+            )
+
+        query_filter = None
+
+        if document_id is not None:
+            query_filter = Filter(
+                must=[
+                    FieldCondition(
+                        key="document_id",
+                        match=MatchValue(value=document_id),
+                    )
+                ]
+            )
+
+        search_result = self.client.query_points(
+            collection_name=self.collection_name,
+            query=query_vector,
+            query_filter=query_filter,
+            limit=top_k,
+            with_payload=True,
+            with_vectors=False,
+        )
+
+        return search_result.points

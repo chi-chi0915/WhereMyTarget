@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models import Chunk
 from app.schemas.chunk import ParentChunk, ChildChunk
@@ -156,3 +156,39 @@ class ChunkRepository:
         db.flush()
 
         return chunk
+    
+    # 복수의 chunk id로 chunk 조회 
+    # 요청과 응답의 id 순서가 다를 수 있음
+    def find_by_ids(
+        self,
+        db: Session,
+        chunk_ids: list[int],
+    ) -> list[Chunk]:
+        if not chunk_ids:
+            return []
+
+        return (
+            db.query(Chunk)
+            .options(
+                joinedload(Chunk.document),
+                joinedload(Chunk.parent),
+            )
+            .filter(Chunk.id.in_(chunk_ids))
+            .all()
+        )
+
+    # 단건의 chunk id로 chunk 조회
+    def find_by_id(
+        self,
+        db: Session,
+        chunk_id: int,
+    ) -> Chunk | None:
+        return (
+            db.query(Chunk)
+            .options(
+                joinedload(Chunk.document),
+                joinedload(Chunk.parent),
+            )
+            .filter(Chunk.id == chunk_id)
+            .first()
+        )
