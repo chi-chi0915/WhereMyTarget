@@ -108,3 +108,51 @@ class ChunkRepository:
                 parent_chunk_id=parent_chunk_id,
                 child_chunk=child_chunk,
             )
+
+    
+    # 단건 문서의 child chunk 조회
+    def find_child_chunks_by_document_id(
+        self,
+        db: Session,
+        document_id: int,
+    ) -> list[Chunk]:
+        return (
+            db.query(Chunk)
+            .filter(
+                Chunk.document_id == document_id,
+                Chunk.chunk_type == "child",
+            )
+            .order_by(Chunk.chunk_index.asc())
+            .all()
+        )
+
+    # 단건 문서의 embedding 되지 않은 child chunk 조회
+    def find_unembedded_child_chunks_by_document_id(
+        self,
+        db: Session,
+        document_id: int,
+    ) -> list[Chunk]:
+        return (
+            db.query(Chunk)
+            .filter(
+                Chunk.document_id == document_id,
+                Chunk.chunk_type == "child",
+                Chunk.qdrant_point_id.is_(None),
+            )
+            .order_by(Chunk.chunk_index.asc())
+            .all()
+        )
+
+    # Qdrant point id 추가
+    def update_qdrant_point_id(
+        self,
+        db: Session,
+        chunk: Chunk,
+        qdrant_point_id: str,
+    ) -> Chunk:
+        chunk.qdrant_point_id = qdrant_point_id
+
+        db.add(chunk)
+        db.flush()
+
+        return chunk
