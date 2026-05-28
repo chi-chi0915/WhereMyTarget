@@ -24,6 +24,7 @@ class SearchService:
             raise ValueError("검색어가 비어 있습니다.")
 
         search_top_k = settings.search_top_k
+        score_threshold = settings.search_score_threshold
 
         query_vector = self.embedding_service.embed_text(query)
 
@@ -44,7 +45,16 @@ class SearchService:
         chunk_ids = [
             int(result.id)
             for result in qdrant_results
+            if result.score >= score_threshold
         ]
+
+        if not chunk_ids:
+            return {
+                "query": query,
+                "document_id": document_id,
+                "top_k": search_top_k,
+                "results": [],
+            }
 
         chunks = self.chunk_repository.find_by_ids(
             db=db,
@@ -61,6 +71,9 @@ class SearchService:
 
         # Qdrant 순서대로 재조립
         for result in qdrant_results:
+            if result.score < score_threshold:
+                continue
+
             chunk_id = int(result.id)
             chunk = chunk_by_id.get(chunk_id)
 

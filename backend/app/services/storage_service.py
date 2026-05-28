@@ -38,6 +38,21 @@ class StorageService:
 
         return storage_key, file_size
     
+    # 파일 삭제
+    def delete_file(
+        self,
+        storage_key: str,
+    ) -> None:
+        file_path = self.get_file_path(storage_key)
+
+        if not file_path.exists():
+            return
+
+        if not file_path.is_file():
+            raise ValueError("삭제 대상이 파일이 아닙니다.")
+
+        file_path.unlink()
+
     # storage_key로 파일 경로 조회
     def get_file_path(self, storage_key: str) -> Path:
         return self.upload_dir / storage_key

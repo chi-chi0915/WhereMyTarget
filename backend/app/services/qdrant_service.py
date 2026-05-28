@@ -1,7 +1,15 @@
 from typing import Any
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams, FieldCondition, Filter, MatchValue
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    MatchValue,
+    PointIdsList,
+    PointStruct,
+    VectorParams,
+)
 
 from app.config import settings
 
@@ -79,6 +87,23 @@ class QdrantService:
             points=points,
         )
 
+    # point 삭제
+    def delete_points(
+        self,
+        point_ids: list[int],
+    ) -> None:
+        self.ensure_collection()
+
+        if not point_ids:
+            return
+
+        self.client.delete(
+            collection_name=self.collection_name,
+            points_selector=PointIdsList(
+                points=point_ids,
+            ),
+        )
+
     # child chunk payload 생성
     def build_chunk_payload(
         self,
@@ -139,3 +164,4 @@ class QdrantService:
         )
 
         return search_result.points
+    

@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models import Document, DocumentFile
 
@@ -67,3 +67,39 @@ class DocumentRepository:
         db.flush()
 
         return document
+    
+    # 문서 목록 조회
+    def find_all(
+        self,
+        db: Session,
+    ) -> list[Document]:
+        return (
+            db.query(Document)
+            .order_by(Document.id.desc())
+            .all()
+        )
+
+    # 문서 상세 조회
+    def find_detail_by_id(
+        self,
+        db: Session,
+        document_id: int,
+    ) -> Document | None:
+        return (
+            db.query(Document)
+            .options(
+                joinedload(Document.file),
+                joinedload(Document.chunks),
+            )
+            .filter(Document.id == document_id)
+            .first()
+        )
+    
+    # 문서 삭제
+    def delete_document(
+        self,
+        db: Session,
+        document: Document,
+    ) -> None:
+        db.delete(document)
+        db.flush()

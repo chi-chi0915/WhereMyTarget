@@ -19,6 +19,9 @@ class Settings:
     # 검색 결과 개수
     search_top_k: int
 
+    # 검색 유사도 임계값
+    search_score_threshold: float
+
     # Qdrant 설정
     qdrant_url: str
     qdrant_collection_name: str
@@ -42,6 +45,11 @@ class Settings:
         self.search_top_k = self._get_int_env(
             key="SEARCH_TOP_K",
             default_value=5,
+        )
+
+        self.search_score_threshold = self._get_float_env(
+            key="SEARCH_SCORE_THRESHOLD",
+            default_value=0.25,
         )
 
         self.qdrant_url = self._get_required_env("QDRANT_URL")
@@ -93,6 +101,18 @@ class Settings:
 
         try:
             return int(value)
+
+        except ValueError:
+            raise ValueError(f"{key} 환경변수는 숫자여야 합니다.")
+        
+    def _get_float_env(self, key: str, default_value: float) -> float:
+        value = os.getenv(key)
+
+        if value is None or value.strip() == "":
+            return default_value
+
+        try:
+            return float(value)
 
         except ValueError:
             raise ValueError(f"{key} 환경변수는 숫자여야 합니다.")
